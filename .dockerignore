@@ -95,3 +95,4 @@ venv/
 # Application
 *.log.*
 *.db
+.env

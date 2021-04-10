@@ -45,6 +45,9 @@ class TestingConfig(Config):
     MAIL_SUPPRESS_SEND = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'test.db')
 
+    # make celery execute tasks synchronously in the same process
+    #CELERY_ALWAYS_EAGER
+
 class ProductionConfig(Config):
     FLASK_ENV = 'production'
 

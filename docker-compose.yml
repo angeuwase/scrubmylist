@@ -5,3 +5,32 @@ services:
         image: redis
         ports:
             - 6379:6379
+        restart: always
+
+    flask_app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: gunicorn -b 0.0.0.0:5000 application:application --worker-class=gevent --workers=4 
+        env_file: .env
+        restart: always
+        ports:
+            - 5000:5000
+        depends_on:
+            - redis
+    
+    celery_worker:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: celery -A celery_worker.celery worker --pool=solo --loglevel=info
+        depends_on:
+            - redis
+            - flask_app
+        restart: always
+        env_file: .env
+
+
+
+        
+
