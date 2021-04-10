@@ -6,11 +6,21 @@ for different environments based on the value of the CONFIG_TYPE environment var
 
 import os
 from flask import Flask
+from flask_mail import Mail
+from celery import Celery
+from config import Config
 
 
 
 
+### Flask extension objects instantiation ###
+mail = Mail()
 
+
+
+
+# Instantiate Celery
+celery = Celery(__name__, broker=Config.CELERY_BROKER_URL, result_backend=Config.RESULT_BACKEND)
 
 
 
@@ -25,9 +35,13 @@ def create_app():
     app.config.from_object(CONFIG_TYPE)
 
     # Configure celery
+    celery.conf.update(app.config)
 
     # Register blueprints
     register_blueprints(app)
+
+    # Initialize flask extension objects
+    initialize_extensions(app)
 
 
     return app
@@ -40,4 +54,7 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(main_blueprint)
+
+def initialize_extensions(app):
+    mail.init_app(app)
 

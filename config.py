@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os 
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,8 +32,8 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    CELERY_BROKER_URL = os.getenv('REDIS_URL ')
-    RESULT_BACKEND = os.getenv('REDIS_URL')
+    CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL ')
+    RESULT_BACKEND = os.getenv('RESULT_BACKEND')
 
 class DevelopmentConfig(Config):
     DEBUG = True
@@ -40,6 +42,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     WTF_CSRF_ENABLED = False
+    MAIL_SUPPRESS_SEND = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'test.db')
 
 class ProductionConfig(Config):
