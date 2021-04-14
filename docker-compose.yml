@@ -13,6 +13,7 @@ services:
             dockerfile: Dockerfile
         command: gunicorn -b 0.0.0.0:5000 application:application --worker-class=gevent --workers=4 
         env_file: .env
+        #- CONFIG_TYPE = config.ProductionConfig
         restart: always
         ports:
             - 5000:5000
