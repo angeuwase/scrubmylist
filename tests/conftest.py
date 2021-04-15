@@ -1,5 +1,5 @@
 import pytest
-from app import db, create_app
+from app import db, create_app, celery
 from app.models import User
 from datetime import datetime
 
@@ -34,6 +34,8 @@ def test_client():
 
     test_app = create_app()
     test_app.config.from_object('config.TestingConfig')
+    celery.conf.task_always_eager = True
+    #test_app.config['CELERY_TASK_ALWAYS_EAGER'] = True
     with test_app.test_client() as testing_client:
         with test_app.app_context():
             db.create_all()

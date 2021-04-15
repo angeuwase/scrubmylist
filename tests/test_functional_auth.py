@@ -57,18 +57,41 @@ def test_invalid_registration_existing_user(test_client):
 def test_successful_registration_new_user(test_client):
     """
     GIVEN a flask application
-    WHEN a POST request for '/register' is received from a new user and they are successfully added to the database
-    THEN check that the user is added to the database, sent an email confirmation link and redirected to the login page to sign in. 
+    WHEN a POST request for '/register' is received from a new user 
+    THEN check that the user is added to the database and redirected to the login page to sign in. 
     """
+    
+
     with mail.record_messages() as outbox:
 
-        response = test_client.post('/register', data={'email': 'test@gmail.com', 'password': 'password', 'confirm_password': 'password'}, follow_redirects=True)
+        response = test_client.post('/register', data={'email': 'test2@gmail.com', 'password': 'password', 'confirm_password': 'password'}, follow_redirects=True)
+
+        print(response.data.decode())
 
         assert response.status_code ==200
         assert b'Login' in response.data
-        #assert b'Thanks for registering! Please check your email to confirm your email address. In the meantime, sign in to access your account.' in response.data
+        assert b'Thanks for registering! Please check your email to confirm your email address. In the meantime, sign in to access your account.' in response.data
+
+@pytest.mark.registration
+def test_successful_registration_email_send(test_client):
+    """
+    GIVEN a flask application
+    WHEN a POST request for '/register' is received from a new user and they are successfully added to the database
+    THEN check that the user is sent a confirmation email
+    """
+    from app.tasks import send_celery_email
+    from flask import render_template
+
+    with mail.record_messages() as outbox:
+        token = 'xyz'
+        message_data = {
+            'subject': 'Flask App - Confirm Your Email Address',
+            'recipients': 'test@gmail.com',
+            'html': render_template('auth/email_confirmation.html', confirm_url=token)
+            }
+        send_celery_email(message_data)
         assert len(outbox) == 1
         assert outbox[0].subject == 'Flask App - Confirm Your Email Address' 
         assert outbox[0].sender == 'angeapptesting18'
         assert outbox[0].recipients[0] == 'test@gmail.com'
-        assert 'http://localhost/confirm_email/' in outbox[0].html 
+        #assert 'http://localhost/confirm_email/' in outbox[0].html 
