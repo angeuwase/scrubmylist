@@ -1,0 +1,52 @@
+version: "3.7"
+
+services:
+    redis:
+        image: redis
+        ports:
+            - 6379:6379
+        restart: always
+
+    flask_app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: python -m pytest
+        env_file: .env.test
+        ports:
+            - 5000:5000
+        depends_on:
+            - redis
+            - migration
+
+    migration:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: flask db init
+        env_file: .env.test
+        depends_on:
+            - postgres
+
+    celery_worker:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        command: celery -A celery_worker.celery worker --pool=solo --loglevel=info
+        depends_on:
+            - redis
+            - flask_app
+        restart: always
+        env_file: .env.test
+
+    postgres:
+        image: postgres:13
+        environment:
+            - POSTGRES_PASSWORD=abc123
+            - POSTGRES_DB=test_db
+        restart: always
+
+
+
+        
+
