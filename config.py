@@ -49,8 +49,6 @@ class TestingConfig(Config):
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(basedir, 'test.db')
    # SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://postgres:{os.getenv('DB_PASSWORD')}@postgres:5432/test_db"
 
-    # make celery execute tasks synchronously in the same process
-   # CELERY_TASK_ALWAYS_EAGER = True
 
 class ProductionConfig(Config):
     FLASK_ENV = 'production'
