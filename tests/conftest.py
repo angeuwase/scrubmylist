@@ -42,3 +42,17 @@ def test_client():
             with test_app.app_context():
                 db.drop_all()
 
+@pytest.fixture(scope='module')
+def register_default_user(test_client):
+    """
+    This fixture registers a default user.
+    It will be used to test user management functionality that requires a registered user, such as login/logout, 
+    """
+
+    test.client.post('/register', data={
+        'email': 'default@gmail.com',
+        'password': 'password',
+        'confirm_password': 'password'
+    },follow_redirects=True)
+
+    return 
