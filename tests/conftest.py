@@ -56,3 +56,19 @@ def register_default_user(test_client):
     },follow_redirects=True)
 
     return 
+
+
+@pytest.fixture(scope='function')
+def login_default_user(test_client, register_default_user):
+    """
+    This fixture logs in the default user, yields for testing to occur, and then logs the user out once testing is completed
+    It will be used to test functionality that requires a logged-in user.
+    """
+    #log in the default user
+    test_client.post('login', data={
+        'email': 'default@gmail.com',
+        'password': 'password'}, follow_redirects=True )
+
+    yield # this is where testing occurs
+
+    test_client.get('/logout', follow_redirects=True)
