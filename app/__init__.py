@@ -74,6 +74,11 @@ def initialize_extensions(app):
 def register_error_handlers(app):
     from flask import render_template
 
+    # 400 - Bad Request
+    @app.errorhandler(400)
+    def forbidden(error):
+        return render_template('400.html'), 400
+
     # 403 - Forbidden
     @app.errorhandler(403)
     def forbidden(error):

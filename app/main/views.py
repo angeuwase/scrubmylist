@@ -1,7 +1,8 @@
 from . import main_blueprint
 from ..tasks import reverse_name
+from flask import render_template
 
-@main_blueprint.route('/<name>')
-def index(name):
-    result = reverse_name.apply_async(args=[name])
-    return 'Hello world from main blueprint'
+@main_blueprint.route('/')
+def index():
+    #result = reverse_name.apply_async(args=[name])
+    return render_template('main/index.html')

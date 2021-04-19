@@ -45,7 +45,7 @@ class User(db.Model, UserMixin):
         self.is_admin = is_admin
 
 
-    def is_password_valid(self, password):
+    def is_password_valid(self, password_plaintext):
         return check_password_hash(self.hashed_password, password_plaintext)
 
     def __repr__(self):

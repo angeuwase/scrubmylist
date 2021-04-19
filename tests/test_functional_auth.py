@@ -34,7 +34,7 @@ def test_invalid_registration_missing_fields(test_client, email, password, confi
 
     assert response.status_code ==200
     assert b'Register' in response.data
-    assert b'Error in form data!' in response.data
+    assert b'Error in form!' in response.data
 
 @pytest.mark.registration
 def test_invalid_registration_existing_user(test_client):
@@ -46,8 +46,6 @@ def test_invalid_registration_existing_user(test_client):
     
     test_client.post('/register', data={'email': 'test@gmail.com', 'password': 'password', 'confirm_password': 'password'}, follow_redirects=True)
     response = test_client.post('/register', data={'email': 'test@gmail.com', 'password': 'password', 'confirm_password': 'password'}, follow_redirects=True)
-
-    print(response.data.decode())
 
     assert response.status_code ==200
     assert b'Login' in response.data
@@ -93,15 +91,14 @@ def test_get_login_form(test_client):
     assert b'Forgot your password?' in response.data
 
 @pytest.mark.login
-@pytest.mark.parametrize('email, password', [('unregistered@gmail.com', 'password'),('default@gmail.com', 'wrong_password')])
-def test_unsuccessful_login_unregistered_user_and_incorrect_password(test_client, register_default_user, email, password):
+def test_unsuccessful_login_unregistered_user(test_client):
     """
     GIVEN a flask application
     WHEN a POST request is received for '/login' from an unregistered user or registered user with incorrect password
     THEN check that they are told 'credentials not recognised'
     """
 
-    response = test_client.post('/login', data={'email': email, 'password': password}, follow_redirects=True)
+    response = test_client.post('/login', data={'email': 'unregistered@gmail.com', 'password': 'password'}, follow_redirects=True)
 
     assert response.status_code == 200
     assert b'Login' in response.data
@@ -109,6 +106,25 @@ def test_unsuccessful_login_unregistered_user_and_incorrect_password(test_client
     assert b'Password' in response.data
     assert b'Forgot your password?' in response.data
     assert b'Credentials not recognised! Please check your email and password. If you arent a registered user, you need to first create an account!' in response.data
+
+
+@pytest.mark.login
+def test_unsuccessful_login_incorrect_password(test_client, register_default_user):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for '/login' from an unregistered user or registered user with incorrect password
+    THEN check that they are told 'credentials not recognised'
+    """
+
+    response = test_client.post('/login', data={'email': 'default@gmail.com', 'password': 'wrong_password'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Login' in response.data
+    assert b'Email' in response.data
+    assert b'Password' in response.data
+    assert b'Forgot your password?' in response.data
+    assert b'Credentials not recognised! Please check your email and password. If you arent a registered user, you need to first create an account!' in response.data
+
 
 @pytest.mark.login
 def test_successful_login_and_logout(test_client, register_default_user):
@@ -118,13 +134,10 @@ def test_successful_login_and_logout(test_client, register_default_user):
     THEN check that they are logged in successfully and redirected to the profile page and that the navbar is appropriate
     """
 
-    response = test_client.post('/login', data={'email': 'default@gmail.com', 'password': 'password'}, follow_redirects=True)
+    response = test_client.post('/login', data={'email':'default@gmail.com', 'password':'password'}, follow_redirects=True)
 
     assert response.status_code == 200
     assert b'Profile' in response.data
-    assert b'Details' in response.data
-    assert b'default@gmail.com' in response.data
-    assert b'Reset your password' in response.data
 
     """
     GIVEN a flask application
@@ -151,9 +164,9 @@ def test_login_valid_next_path(test_client, register_default_user):
     response = test_client.post('/login?next=%2Fprofile', data={'email': 'default@gmail.com', 'password': 'password'}, follow_redirects=True)
     assert response.status_code == 200
     assert b'Profile' in response.data
-    assert b'Details' in response.data
-    assert b'default@gmail.com' in response.data
-    assert b'Reset your password' in response.data
+
+    # Log out the user - Clean up! Otherwise next next will fail with "already logged in" response
+    test_client.get('/logout', follow_redirects=True)
 
 
 @pytest.mark.login
@@ -167,6 +180,9 @@ def test_login_invalid_next_path(test_client, register_default_user):
     """
 
     response = test_client.post('/login?next=http://www.unsafesite.com', data={'email': 'default@gmail.com', 'password': 'password'}, follow_redirects=True)
+
+    print(response.data.decode())
+
     assert response.status_code == 400
     assert b'Bad Request' in response.data
 
@@ -213,7 +229,7 @@ def test_post_request_for_logout(test_client):
 
     response = test_client.post('/logout', follow_redirects=True)
 
-    assert response.status_code == 200
+    assert response.status_code == 405
     assert b'Method Not Allowed' in response.data
 
 

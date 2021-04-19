@@ -49,7 +49,7 @@ def register_default_user(test_client):
     It will be used to test user management functionality that requires a registered user, such as login/logout, 
     """
 
-    test.client.post('/register', data={
+    test_client.post('/register', data={
         'email': 'default@gmail.com',
         'password': 'password',
         'confirm_password': 'password'

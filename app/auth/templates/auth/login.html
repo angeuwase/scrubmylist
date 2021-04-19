@@ -1,10 +1,38 @@
-
+{% extends 'bootstrap/base.html'  %} 
+{% import 'bootstrap/wtf.html' as wtf  %} 
 
 {% block title  %}Login{% endblock  %}
 
 {% block content  %} 
 {% include 'flash_messages.html' %}
 
+<div class="container" >
+    <div class="col-md-4 col-md-offset-4" >
+        <div class='text-center h1 text-white bg-primary' style='padding:10px 0px;'>Login</div>
+        <hr>
+        <form action="" method="post" class="form" role="form" >
+            {{ form.hidden_tag() }}
+        
+            <div class="form-group ">
+            {{ wtf.form_field(form.email, type='text', class='form-control', placeholder='Email') }}
+            </div>
+        
+            <div class="form-group">
+            {{ wtf.form_field(form.password, type='password', class='form-control', placeholder='Password') }}
+            </div>
+        
+            <button type="submit" class="btn btn-primary btn-lg btn-block">Submit</button>
+        </form>
+        <hr>
+        <p>Don't have an account?</p>
+        <p><a href="{{url_for('auth.register')}}">Create an account here.</a></p>
+        <hr>
+        <p>Forgot your password?</p>
+        <p><a href="{{url_for('auth.password_reset')}}">Reset it here.</a></p>
 
+    </div>
+
+    </div>
+{% include 'footer.html' %}
 
 {% endblock  %}

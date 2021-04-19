@@ -1,0 +1,13 @@
+{% extends 'bootstrap/base.html'  %} 
+{% import 'bootstrap/wtf.html' as wtf  %} 
+
+{% block title  %}Home Page{% endblock  %}
+
+{% block content  %} 
+{% include 'flash_messages.html' %}
+
+
+<h1>Hello world from main blueprint</h1>
+{% include 'footer.html' %}
+
+{% endblock  %}
