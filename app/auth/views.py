@@ -8,6 +8,9 @@ from .. import db
 from ..models import User
 from flask_login import current_user, login_required, logout_user, login_user
 from urllib.parse import urlparse
+from itsdangerous import URLSafeTimedSerializer
+from itsdangerous.exc import BadSignature
+
 #@auth_blueprint.route('/register/<email>')
 #def test_register(email):
     #message_data = {
@@ -116,7 +119,30 @@ def profile():
 
 @auth_blueprint.route('/confirm_email/<token>')
 def confirm_email(token):
-   pass
+
+    try:
+        confirm_serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+        email = confirm_serializer.loads(token, salt='email-confirmation-salt', max_age=3600)
+    except BadSignature as e:
+        flash('The confirmation link is invalid or has expired.')
+        current_app.logger.info(f'Invalid or expired confirmation link received from IP address: {request.remote_addr}')
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(email=email).first()
+
+    if user.is_confirmed:
+        flash('Account already confirmed. Please login.')
+        current_app.logger.info(f'Confirmation link received for a confirmed user: {user.email}')
+    else:
+        user.is_confirmed = True
+        user.date_confirmed = datetime.now()
+        user.date_updated = datetime.now()
+        db.session.add(user)
+        db.session.commit()
+        flash('Thank you for confirming your email address!')
+        current_app.logger.info(f'Email address confirmed for: {user.email}')
+
+    return redirect(url_for('main.index'))
 
 
 @auth_blueprint.route('/password_reset')

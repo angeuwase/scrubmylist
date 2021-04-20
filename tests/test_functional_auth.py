@@ -4,6 +4,11 @@ This module contains functionality tests for the auth blueprint (user management
 
 from app import mail
 import pytest
+from app.email_tokens import generate_confirmation_email_token
+from app.models import User
+from itsdangerous import URLSafeTimedSerializer
+from flask import current_app, url_for
+import time 
 
 @pytest.mark.registration
 def test_get_registration_form(test_client):
@@ -233,6 +238,55 @@ def test_post_request_for_logout(test_client):
     assert b'Method Not Allowed' in response.data
 
 
+@pytest.mark.account_confirmation
+def test_email_confirmation_valid_link(test_client, register_default_user):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/confirm_email/<token>' route from a valid link
+    THEN check that the user's email address is marked as confirmed
+    """
+    confirm_serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    token = confirm_serializer.dumps('default@gmail.com', salt='email-confirmation-salt')
 
+    response = test_client.get('/confirm_email/'+token, follow_redirects=True)
 
+    assert response.status_code == 200
+    assert b'Thank you for confirming your email address!' in response.data
+    user = User.query.filter_by(email='default@gmail.com').first()
+    assert user.is_confirmed == True
+
+@pytest.mark.account_confirmation
+def test_email_confirmation_valid_link_confirmed_user(test_client, register_default_user):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/confirm_email/<token>' route from a valid link from an already confirmed user
+    THEN check that the user gets a message indicating that their email address has already been confirmed
+    """
     
+
+    confirm_serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    token = confirm_serializer.dumps('default@gmail.com', salt='email-confirmation-salt')
+
+    test_client.get('/confirm_email/'+token, follow_redirects=True)
+
+    response = test_client.get('/confirm_email/'+token, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Account already confirmed.' in response.data
+    user = User.query.filter_by(email='default@gmail.com').first()
+    assert user.is_confirmed == True
+
+@pytest.mark.account_confirmation
+def test_email_confirmation_invalid_link(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/confirm_email/<token>' route from an invalid link
+    THEN check that an error message is displayed to the user
+    """
+
+    response = test_client.get('/confirm_email/a_bad_token', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'The confirmation link is invalid or has expired.' in response.data
+
+
