@@ -45,8 +45,13 @@ class User(db.Model, UserMixin):
         self.is_admin = is_admin
 
 
-    def is_password_valid(self, password_plaintext):
+    def is_password_valid(self, password_plaintext: str):
         return check_password_hash(self.hashed_password, password_plaintext)
+
+    def new_password(self, password_plaintext: str):
+        self.hashed_password = generate_password_hash(password_plaintext)
+        self.date_updated =  datetime.now()
+
 
     def __repr__(self):
         return '<User {0}: {1}>'.format(self.id, self.email)

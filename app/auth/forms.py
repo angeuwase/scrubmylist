@@ -7,7 +7,13 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired(), EqualTo('confirm_password', message='Passwords must match'), Length(min=6, max=120)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=6, max=120)])
 
-
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6, max=120)])
+
+class PasswordResetViaEmailForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+
+class PasswordForm(FlaskForm):
+    password = PasswordField('New Password', validators=[DataRequired(), EqualTo('confirm_password', message='Passwords must match'), Length(min=6, max=120)])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), Length(min=6, max=120)])

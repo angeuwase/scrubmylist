@@ -72,3 +72,39 @@ def login_default_user(test_client, register_default_user):
     yield # this is where testing occurs
 
     test_client.get('/logout', follow_redirects=True)
+
+
+@pytest.fixture(scope='function')
+def confirm_default_user_email(test_client, login_default_user):
+    """
+    This fixture logs the default user in, marks them as having confirmed their email address so that the password reset and profile functionality can be tested.
+    After testing is completed the user's email is marked as unconfirmed again to return the system to a known state.
+    """
+
+    # Mark the user as having their email address confirmed
+    user = User.query.filter_by(email='default@gmail.com').first()
+
+    user.is_confirmed = True
+    user.date_confirmed = datetime(2021, 4, 20)
+    user.date_updated = datetime(2021, 4, 20)
+    db.session.add(user)
+    db.session.commit()
+
+
+@pytest.fixture(scope='function')
+def reset_default_user_to_original():
+    """
+    The tests that test password reset and email confirmation functionality can change the attributes of the default user.
+    This fixture is required to make sure that the default user's attributes always returns back to the default values.
+    """
+    yield  # this is where the testing happens!
+
+    user = User.query.filter_by(email='default@gmail.com').first()
+    user.is_confirmed = False
+    user.date_confirmed = None
+    user.date_updated = None
+    user.new_password('password')
+    db.session.add(user)
+    db.session.commit()
+
+

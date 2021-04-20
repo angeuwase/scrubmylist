@@ -1,6 +1,8 @@
 """
 This module contains unit tests for the database models.
 """
+
+
 def test_user_model(new_user):
     """
     GIVEN a User model
@@ -16,3 +18,17 @@ def test_user_model(new_user):
     assert new_user.date_confirmed == None
     assert new_user.date_updated == None
     assert new_user.is_admin == False
+
+def test_new_password(new_user):
+    """
+    GIVEN a User model
+    WHEN the user's password is changed
+    THEN check that it has been changed to the new one
+    """
+
+    new_user.new_password('Anewpassword')
+
+    assert new_user.email == 'test@gmail.com'
+    assert new_user.hashed_password != 'Anewpassword'
+    assert new_user.is_password_valid('Anewpassword') == True
+    assert new_user.is_password_valid('password') == False

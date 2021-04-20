@@ -239,7 +239,7 @@ def test_post_request_for_logout(test_client):
 
 
 @pytest.mark.account_confirmation
-def test_email_confirmation_valid_link(test_client, register_default_user):
+def test_email_confirmation_valid_link(test_client, register_default_user, reset_default_user_to_original):
     """
     GIVEN a flask application
     WHEN a GET request is received for the '/confirm_email/<token>' route from a valid link
@@ -256,7 +256,7 @@ def test_email_confirmation_valid_link(test_client, register_default_user):
     assert user.is_confirmed == True
 
 @pytest.mark.account_confirmation
-def test_email_confirmation_valid_link_confirmed_user(test_client, register_default_user):
+def test_email_confirmation_valid_link_confirmed_user(test_client, register_default_user, reset_default_user_to_original):
     """
     GIVEN a flask application
     WHEN a GET request is received for the '/confirm_email/<token>' route from a valid link from an already confirmed user
@@ -290,3 +290,141 @@ def test_email_confirmation_invalid_link(test_client):
     assert b'The confirmation link is invalid or has expired.' in response.data
 
 
+@pytest.mark.password_reset
+def test_get_password_reset_via_email_form(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/password_reset_via_email' route (ie when a user clicks on the 'forgot your password?' link on the login form)
+    THEN check that the password_reset_via_email form is successfully returned
+    """
+
+    response = test_client.get('/password_reset_via_email', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Password Reset' in response.data
+    assert b'Please enter your email' in response.data
+    assert b'Email' in response.data
+    assert b'Submit' in response.data
+
+
+@pytest.mark.password_reset
+def test_post_password_reset_via_email_form_unregistered_email(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/password_reset_via_email' route with an unregistered email or a registered email address that has not been confirmed yet
+    THEN check that an error message is flashed and no password_reset email is sent
+    """
+    with mail.record_messages() as outbox:
+
+        response = test_client.post('/password_reset_via_email',
+                                    data={'email': 'unregistered@gmail.com'},
+                                    follow_redirects=True)
+        
+        assert response.status_code == 200
+        assert len(outbox) == 0
+        assert b'Cannot send password reset link. The email address provided is either unregistered or has not yet been confirmed.' in response.data
+
+
+@pytest.mark.password_reset
+def test_post_password_reset_via_email_form_unconfirmed_email(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/password_reset_via_email' route with an unregistered email or a registered email address that has not been confirmed yet
+    THEN check that an error message is flashed and no password_reset email is sent
+    """
+    with mail.record_messages() as outbox:
+
+        response = test_client.post('/password_reset_via_email',
+                                    data={'email': 'default@gmail.com'},
+                                    follow_redirects=True)
+        
+        assert response.status_code == 200
+        assert len(outbox) == 0
+        assert b'Cannot send password reset link. The email address provided is either unregistered or has not yet been confirmed.' in response.data
+ 
+
+@pytest.mark.password_reset
+def test_post_password_reset_via_email_form_confirmed_email(test_client, confirm_default_user_email, reset_default_user_to_original):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/password_reset_via_email' route with a confirmed email address 
+    THEN check that an email with a password reset link was queued up to be sent
+    """
+    with mail.record_messages() as outbox:
+
+        response = test_client.post('/password_reset_via_email',
+                                    data={'email': 'default@gmail.com'},
+                                    follow_redirects=True)
+        
+        assert response.status_code == 200
+        assert b'Please check your email for a password reset link.' in response.data
+        assert len(outbox) == 1
+        assert outbox[0].subject == 'Flask App - Password Reset'
+        assert outbox[0].recipients[0] == 'default@gmail.com'
+        assert 'http://localhost/password_reset_via_token/' in outbox[0].html
+
+
+@pytest.mark.password_reset
+def test_get_password_reset_form_valid_link(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/password_reset_via_token/<token>' route from a valid link
+    THEN check that the password reset form is rendered correctly
+    """
+    reset_serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    token = reset_serializer.dumps('default@gmail.com', salt='password-reset-salt')
+
+    response = test_client.get('/password_reset_via_token/'+token, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Password Reset' in response.data
+    assert b'New Password' in response.data
+    assert b'Confirm Password' in response.data
+    assert b'Submit' in response.data
+
+@pytest.mark.password_reset
+def test_get_password_reset_form_invalid_link(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/password_reset_via_token/<token>' route from an invalid link
+    THEN check that an error message is displayed
+    """
+
+    response = test_client.get('/password_reset_via_token/a_bad_token', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'The password reset link is invalid or has expired.' in response.data
+
+@pytest.mark.password_reset
+def test_post_password_reset_form_valid_link(test_client, reset_default_user_to_original):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/password_reset_via_token/<token>' route from a valid link
+    THEN check that the user's password gets reset
+    """
+    reset_serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
+    token = reset_serializer.dumps('default@gmail.com', salt='password-reset-salt')
+
+    response = test_client.post('/password_reset_via_token/'+token,
+                                data={'password':'newpassword', 'confirm_password':'newpassword'},
+                                follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Your password has been updated!' in response.data
+
+@pytest.mark.password_reset
+def test_post_password_reset_form_invalid_link(test_client):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/password_reset_via_token/<token>' route from an invalid link
+    THEN check that an error message gets shown
+    """
+    token = 'a bad token'
+
+    response = test_client.post('/password_reset_via_token/'+token,
+                                data={'password':'newpassword', 'confirm_password':'newpassword'},
+                                follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Your password has been updated!' not in response.data
+    assert b'The password reset link is invalid or has expired.' in response.data
