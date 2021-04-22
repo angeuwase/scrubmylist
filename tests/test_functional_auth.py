@@ -428,3 +428,173 @@ def test_post_password_reset_form_invalid_link(test_client):
     assert response.status_code == 200
     assert b'Your password has been updated!' not in response.data
     assert b'The password reset link is invalid or has expired.' in response.data
+
+@pytest.mark.profile
+def test_get_profile_not_logged_in(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/profile' page from a user that is not logged in
+    THEN check that the user is redirected to the login page and can't access the profile page
+    """
+
+    response = test_client.get('/profile', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Please log in to access this page.' in response.data
+    assert b'Login' in response.data
+
+@pytest.mark.profile
+def test_get_profile_logged_in_not_confirmed(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/profile' page from a user that is logged in but their email address has not been confirmed
+    THEN check that the profile page renders correctly
+    """
+
+    response = test_client.get('/profile', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Account Details' in response.data
+    assert b'Email: default@gmail.com' in response.data
+    assert b'Registered on:' in response.data
+    assert b'Email address has not been confirmed!' in response.data
+    assert b'Email address confirmed on:' not in response.data
+    assert b'Account Actions' in response.data
+    assert b'Change password' in response.data
+    assert b'Resend email confirmation link' in response.data
+
+@pytest.mark.profile
+def test_get_profile_logged_in_confirmed(test_client, login_default_user, confirm_default_user_email):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/profile' page from a user that is logged in but their email address has been confirmed
+    THEN check that the profile page renders correctly
+    """
+
+    response = test_client.get('/profile', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Account Details' in response.data
+    assert b'Email: default@gmail.com' in response.data
+    assert b'Registered on:' in response.data
+    assert b'Email address has not been confirmed!' not in response.data
+    assert b'Email address confirmed on:' in response.data
+    assert b'Account Actions' in response.data
+    assert b'Change password' in response.data
+    assert b'Resend email confirmation link' in response.data
+
+@pytest.mark.profile
+def test_get_change_password_form_not_logged_in(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/change_password' page from a user who is not logged in
+    THEN check that they are redirected to the login page and told to log in
+    """
+
+    response = test_client.get('/change_password', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Please log in to access this page.' in response.data
+    assert b'Login' in response.data
+
+@pytest.mark.profile
+def test_get_change_password_form_logged_in(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/change_password' page from a user who is logged in
+    THEN check that the change password form renders correctly
+    """
+
+    response = test_client.get('/change_password', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Current Password' in response.data
+    assert b'New Password' in response.data
+    assert b'Confirm New Password' in response.data
+
+@pytest.mark.profile
+def test_post_change_password_form_not_logged_in(test_client):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/change_password' page from a user who is not logged in
+    THEN check that they are redirected to the login page and told to log in
+    """
+
+    response = test_client.post('/change_password', data={'current_password': 'password', 'new_password':'newpassword', 'confirm_new_password': 'newpassword'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Please log in to access this page.' in response.data
+    assert b'Login' in response.data
+
+@pytest.mark.profile
+def test_post_change_password_form_logged_in_invalid(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/change_password' page from a user who is logged in but form has invalid current password
+    THEN check that an error message is displayed to the user
+    """
+
+    response = test_client.post('/change_password', data={'current_password': 'wrongpassword', 'new_password':'newpassword', 'confirm_new_password': 'newpassword'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Current Password' in response.data
+    assert b'New Password' in response.data
+    assert b'Confirm New Password' in response.data
+    assert b'Invalid current password!' in response.data
+
+@pytest.mark.profile
+def test_post_change_password_form_logged_in_successful(test_client, login_default_user, reset_default_user_to_original):
+    """
+    GIVEN a flask application
+    WHEN a POST request is received for the '/change_password' page from a user who is logged in and the form has valid current password
+    THEN check that the user's password gets updated accordingly
+    """
+
+    response = test_client.post('/change_password', data={'current_password': 'password', 'new_password':'newpassword', 'confirm_new_password': 'newpassword'}, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Your password has been updated!' in response.data
+    assert b'Account Details' in response.data
+    assert b'Email: default@gmail.com' in response.data
+    assert b'Registered on:' in response.data
+    assert b'Email address has not been confirmed!' not in response.data
+    assert b'Email address confirmed on:' in response.data
+    assert b'Account Actions' in response.data
+    assert b'Change password' in response.data
+    assert b'Resend email confirmation link' in response.data
+    user = User.query.filter_by(email='default@gmail.com').first()
+    assert user.is_password_valid('newpassword') == True
+    assert user.is_password_valid('password') == False
+
+@pytest.mark.profile
+def test_get_resend_email_confirmation_not_logged_in(test_client):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/resend_email_confirmation' route from a user who is not logged in
+    THEN check that they are redirected to the login page and told to log in
+    """
+    
+    response = test_client.get('/resend_email_confirmation', follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'Please log in to access this page.' in response.data
+    assert b'Login' in response.data
+
+@pytest.mark.profile
+def test_get_resend_email_confirmation_logged_in(test_client, login_default_user):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for the '/resend_email_confirmation' route from a user who is logged in
+    THEN check that an email address confirmation email is queued to be sent to the user
+    """
+    with mail.record_messages() as outbox:
+
+        response = test_client.get('/resend_email_confirmation', follow_redirects=True)
+
+        assert response.status_code == 200
+        assert b'Please check your email for the email address confirmation link.' in response.data
+        assert len(outbox) == 1
+        assert outbox[0].subject == 'Flask App - Confirm Your Email Address' 
+        assert outbox[0].sender == 'angeapptesting18'
+        assert outbox[0].recipients[0] == 'default@gmail.com'
+        assert 'http://localhost/confirm_email/' in outbox[0].html 

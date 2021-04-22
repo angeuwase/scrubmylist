@@ -81,7 +81,6 @@ def confirm_default_user_email(test_client, login_default_user):
     After testing is completed the user's email is marked as unconfirmed again to return the system to a known state.
     """
 
-    # Mark the user as having their email address confirmed
     user = User.query.filter_by(email='default@gmail.com').first()
 
     user.is_confirmed = True

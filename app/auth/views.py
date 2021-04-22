@@ -1,6 +1,6 @@
 from . import auth_blueprint
 from ..tasks import send_celery_email
-from .forms import RegistrationForm, LoginForm, PasswordResetViaEmailForm, PasswordForm
+from .forms import RegistrationForm, LoginForm, PasswordResetViaEmailForm, PasswordForm, ChangePasswordForm
 from flask import request, render_template, url_for, redirect, current_app, flash, abort
 from datetime import datetime
 from ..email_tokens import generate_confirmation_email_token, generate_password_reset_token
@@ -115,6 +115,41 @@ def logout():
 @login_required
 def profile():
     return render_template('auth/profile.html')
+
+@auth_blueprint.route('/change_password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    form = ChangePasswordForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            if current_user.is_password_valid(form.current_password.data):
+                current_user.new_password(form.new_password.data)
+                db.session.add(current_user)
+                db.session.commit()
+                flash('Your password has been updated!')
+                current_app.logger.info(f'Password updated for user: {current_user.email}')
+                return redirect(url_for('auth.profile'))
+            else:
+                flash('Invalid current password!')
+                current_app.logger.info(f'Incorrect password change for user: {current_user.email}')
+    return render_template('auth/change_password.html', form=form)
+
+@auth_blueprint.route('/resend_email_confirmation')
+@login_required
+def resend_email_confirmation():
+    # Send account confirmation email
+    token = generate_confirmation_email_token(current_user.email)
+    message_data = {
+        'subject': 'Flask App - Confirm Your Email Address',
+        'recipients': current_user.email,
+        'html': render_template('auth/email_confirmation.html', confirm_url=token)
+    }
+
+    send_celery_email.apply_async(args=[message_data])
+
+    flash('Please check your email for the email address confirmation link.')
+    current_app.logger.info(f'Email confirmation link resent to user: {current_user.email}')
+    return redirect(url_for('auth.profile'))
 
 
 @auth_blueprint.route('/confirm_email/<token>')
