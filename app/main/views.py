@@ -6,3 +6,9 @@ from flask import render_template
 def index():
     #result = reverse_name.apply_async(args=[name])
     return render_template('main/index.html')
+
+
+@main_blueprint.route('/upload_email_list')
+def upload_email_list():
+    #result = reverse_name.apply_async(args=[name])
+    return 'page under construction'

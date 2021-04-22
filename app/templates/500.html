@@ -1,1 +1,21 @@
-Internal server error
+{% extends 'bootstrap/base.html'  %} 
+{% import 'bootstrap/wtf.html' as wtf  %} 
+
+{% block title  %}500{% endblock  %}
+
+{%  block   navbar  %}
+{% if current_user.is_authenticated %}
+{% include 'navbar_logged_in.html' %}
+{% else %}
+{% include 'navbar_not_logged_in.html' %}
+{% endif %}
+{%  endblock  %}
+
+{% block content  %} 
+{% include 'flash_messages.html' %}
+
+
+<h1>Internal Server Error</h1>
+{% include 'footer.html' %}
+
+{% endblock  %}

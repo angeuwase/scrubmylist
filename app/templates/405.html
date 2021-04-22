@@ -1,1 +1,21 @@
-Method Not Allowed 
+{% extends 'bootstrap/base.html'  %} 
+{% import 'bootstrap/wtf.html' as wtf  %} 
+
+{% block title  %}405{% endblock  %}
+
+{%  block   navbar  %}
+{% if current_user.is_authenticated %}
+{% include 'navbar_logged_in.html' %}
+{% else %}
+{% include 'navbar_not_logged_in.html' %}
+{% endif %}
+{%  endblock  %}
+
+{% block content  %} 
+{% include 'flash_messages.html' %}
+
+
+<h1>Method Not Allowed</h1>
+{% include 'footer.html' %}
+
+{% endblock  %}

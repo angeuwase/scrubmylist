@@ -598,3 +598,40 @@ def test_get_resend_email_confirmation_logged_in(test_client, login_default_user
         assert outbox[0].sender == 'angeapptesting18'
         assert outbox[0].recipients[0] == 'default@gmail.com'
         assert 'http://localhost/confirm_email/' in outbox[0].html 
+
+
+@pytest.mark.navigation
+@pytest.mark.parametrize('page', ['/register', '/login', '/profile', '/change_password', 'password_reset_via_email'])
+def test_navbar_not_logged_in(test_client, page):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for pages when a user is not logged in
+    THEN test that the navigation bar is appropriate
+    """
+
+    response = test_client.get(page, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'SCRUB MY LIST' in response.data
+    assert b'HOME' in response.data
+    assert b'REGISTER' in response.data
+    assert b'LOGIN' in response.data
+
+@pytest.mark.navigation
+@pytest.mark.parametrize('page', ['/register', '/login', '/profile', '/change_password', 'password_reset_via_email'])
+def test_navbar_logged_in(test_client, login_default_user, page):
+    """
+    GIVEN a flask application
+    WHEN a GET request is received for pages when a user is logged in
+    THEN test that the navigation bar is appropriate
+    """
+
+    response = test_client.get(page, follow_redirects=True)
+
+    assert response.status_code == 200
+    assert b'SCRUB MY LIST' in response.data
+    assert b'HOME' in response.data
+    assert b'UPLOAD EMAIL LIST' in response.data
+    assert b'PROFILE' in response.data
+    assert b'LOGOUT' in response.data
+
