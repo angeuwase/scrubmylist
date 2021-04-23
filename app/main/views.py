@@ -24,61 +24,59 @@ def upload_email_list():
     if request.method == 'POST':
         uploaded_file = request.files['csv_file'] 
        
+        # First make sure the form submission actually has a file
         if uploaded_file:
+
+            # If there was a file submitted with the form sanitize the file name
             filename = secure_filename(uploaded_file.filename)
+
+            # Check the file extension and reject any unsupported file types
             if filename != " ":
                 file_ext = os.path.splitext(filename)[1]
                 if file_ext not in current_app.config['UPLOAD_EXTENSIONS']:
                     abort(400)
-                
-                new_filename = current_user.email+' '+filename
-                upload_path = os.path.join(current_app.config['UPLOAD_PATH'], new_filename)
-                uploaded_file.save(upload_path)
- 
-                with open(upload_path, newline='') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    file_headers = reader.fieldnames
 
-                    if "email" in file_headers:
-                        for row in reader:
-                            print(row['email'])
-                        flash('File has been received!')
-                        return redirect(url_for('main.upload_email_list'))
-                    flash('No column named email in the csv file.')
+                # Create a pandas dataframe of the csv file
+                data = pd.read_csv(uploaded_file)
+
+                # Isolate the headings in the dataframe and check to make sure that the expected 'email' column is present in the file
+                file_headers = list(data.columns.values.tolist())
+
+                if "email" in file_headers:
+
+                    # Discard all unnecessary data columns so that we only work with the email column
+                    email_data = data['email']
+
+                    # Remove duplicate emails and take note how many of the original emails were duplicates
+                    email_data_duplicates_removed = email_data.drop_duplicates()
+                    total_emails = email_data.count()
+                    duplicates = total_emails - email_data_duplicates_removed.count()
+
+                    # Create a pandas dataframe of the list of non-duplicate emails
+                    cleaned_email_list = {'email':[]}
+                    for email in email_data_duplicates_removed:
+                        cleaned_email_list['email'].append(email)
+                    df = pd.DataFrame(cleaned_email_list)
+
+                    # Prepend the user's email address to the file name before saving it to the server to distinguish files uploaded by different users
+                    new_filename = current_user.email+' '+filename
+
+                    # Define the absolute path to the location where the csv file should be saved on the server
+                    upload_path = os.path.join(current_app.config['UPLOAD_PATH'], new_filename)
+
+                    # Write the pandas dataframe to a csv file to be saved on the server
+                    df.to_csv(upload_path, index=False)
+                    current_app.logger.info(f'New csv file uploaded to the server:{upload_path}')
+
+                    flash('File has been received!')
                     return redirect(url_for('main.upload_email_list'))
-  
+
+                flash('No column named email in the csv file.')
+                current_app.logger.info(f'No email column in file uploaded:{current_user.email}')
+                return redirect(url_for('main.upload_email_list'))
+
         flash("Please upload a csv file.")
         current_app.logger.info(f'No file attached when uploading email list:{current_user.email}')
         return redirect(url_for('main.upload_email_list'))
-  
-        
-        #data = pd.read_csv(f)
-       # email_data = data['email']
-       # for email in email_data:
-           # print(email)
-        #email_data_duplicates_removed = email_data.drop_duplicates()
-        #duplicates = email_data.count()-email_data_duplicates_removed.count()
-        #print('duplicates', duplicates)
-
-        #for email in email_data_duplicates_removed:
-           # print(email)
-
-        
-        #filename = f.filename
-
-            
-            #for row in reader:
-            #    print(row['email'])
-            
-        
-
-
-            #print(row['first_name'], row['last_name'])
-        #fstring = f.read()
-        #print('text', fstring)
-        #
-        #return fstring
-        #current_app.logger.info(f'Email list uploaded by {current_user.email}:{request.files['file'].filename}')
-       # return redirect(url_for('main.upload_email_list'))
 
     return render_template('main/upload_list.html')
