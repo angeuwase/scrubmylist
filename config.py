@@ -35,6 +35,9 @@ class Config:
     CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL ')
     RESULT_BACKEND = os.getenv('RESULT_BACKEND')
 
+    UPLOAD_PATH = 'assets'
+    UPLOAD_EXTENSIONS = ['.csv']
+    MAX_CONTENT_LENGTH = 1024 * 4
     
 
 class DevelopmentConfig(Config):

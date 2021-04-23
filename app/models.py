@@ -28,6 +28,7 @@ class User(db.Model, UserMixin):
     date_confirmed = db.Column(db.DateTime)
     date_updated = db.Column(db.DateTime)
     is_admin = db.Column(db.Boolean, default=False)
+    uploaded_lists = db.relationship('EmailList', backref='owner', lazy='dynamic')
 
 
     def __init__(self, email: str, password_plaintext: str, date_registered=None, is_admin=False):
@@ -45,6 +46,7 @@ class User(db.Model, UserMixin):
         self.is_admin = is_admin
 
 
+
     def is_password_valid(self, password_plaintext: str):
         return check_password_hash(self.hashed_password, password_plaintext)
 
@@ -55,3 +57,30 @@ class User(db.Model, UserMixin):
 
     def __repr__(self):
         return '<User {0}: {1}>'.format(self.id, self.email)
+
+
+class EmailList(db.Model):
+    """
+    This class maps to the email lists table in the database.
+
+    Attributes of interest for a given email list:
+    1. id (integer)
+    2. file_name (string) - the name of the csv file uploaded by the user
+    3. date_uploaded (datetime) - the date the user uploaded the email list
+    4. owner_id (integer) - the id of the user who uploaded the email list
+    """
+    __tablename__ = 'emaillists '
+
+    id = db.Column(db.Integer, primary_key=True)
+    file_name = db.Column(db.String, nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    date_uploaded = db.Column(db.DateTime)
+    
+
+    def __init__(self, file_name: str, owner_id: int, date_uploaded=None):
+        self.file_name = file_name
+        self.date_uploaded = date_uploaded
+        self.owner_id = owner_id
+
+    def __repr__(self):
+        return '<Email List {}>'.format(self.id)

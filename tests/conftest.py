@@ -1,7 +1,8 @@
 import pytest
 from app import db, create_app, celery
-from app.models import User
+from app.models import User, EmailList
 from datetime import datetime
+import os
 
 
 @pytest.fixture(scope='module')
@@ -105,5 +106,32 @@ def reset_default_user_to_original():
     user.new_password('password')
     db.session.add(user)
     db.session.commit()
+
+
+##### Main application functionality #####
+
+@pytest.fixture(scope='module')
+def new_list():
+    """
+    This fixture creates an object of the EmailList class. 
+    It is used to test that when a new list object is instantiated, the object has all the expected attributes.
+
+    Expected attributes of a user:
+    1. id 
+    2. file_name
+    3. date_uploaded
+    4. owner_id
+
+    """
+    email_list = EmailList('example.csv',17, date_uploaded=datetime(2021,4,14))
+    return email_list
+
+
+@pytest.fixture(scope='function')
+def delete_uploaded_file():
+    yield # this is where testing occurs
+
+    # delete the csv file saved to the assets folder during a test
+    os.remove(os.path.join('assets', 'default@gmail.com subscribers.csv'))
 
 

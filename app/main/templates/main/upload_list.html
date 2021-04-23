@@ -1,7 +1,7 @@
 {% extends 'bootstrap/base.html'  %} 
 {% import 'bootstrap/wtf.html' as wtf  %} 
 
-{% block title  %}            {% endblock  %}
+{% block title  %} Email List Upload  {% endblock  %}
 
 {%  block   navbar  %}
 {% if current_user.is_authenticated %}
@@ -14,8 +14,21 @@
 {% block content  %} 
 {% include 'flash_messages.html' %}
 
+<div class='container' style= "display: block;text-align: left;    margin:0 auto;max-width: 750px; padding-left:200px">
+    <h1>Please note!</h1>
+    <p>Only csv files are allowed.</p>
+    <p>Files can have multiple columns of data.</p>
+    <p>Make sure that the name of the column for the email addresses is called "email"</p>
+    <hr>
 
-<h1>Hello world from main blueprint</h1>
+    <h1>Select a file to upload</h1>
+    <form method="POST" action="" enctype="multipart/form-data">
+        <p><input type="file" name="csv_file" accept='.csv'></p>
+        <p><input type="submit" value="Submit"></p>
+      </form>
+
+</div>
+
 {% include 'footer.html' %}
 
 {% endblock  %}

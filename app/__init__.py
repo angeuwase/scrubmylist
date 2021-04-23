@@ -94,6 +94,11 @@ def register_error_handlers(app):
     def method_not_allowed(error):
         return render_template('405.html'), 405
 
+    # 413 - File Too Big
+    @app.errorhandler(413)
+    def method_not_allowed(error):
+        return render_template('413.html'), 413
+
     # 500 - Internal Server Error
     @app.errorhandler(500)
     def server_error(error):

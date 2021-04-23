@@ -32,3 +32,20 @@ def test_new_password(new_user):
     assert new_user.hashed_password != 'Anewpassword'
     assert new_user.is_password_valid('Anewpassword') == True
     assert new_user.is_password_valid('password') == False
+
+
+
+##### Main application functionality #####
+
+def test_email_list_model(new_list):
+    """
+    GIVEN an EmailList model
+    WHEN a new email list object is instantiated
+    THEN check that the email list object has all the expected attributes
+    """
+    assert new_list.file_name == 'example.csv'
+    assert new_list.date_uploaded.year == 2021
+    assert new_list.date_uploaded.month == 4
+    assert new_list.date_uploaded.day == 14
+    assert new_list.owner_id == 17
+    
