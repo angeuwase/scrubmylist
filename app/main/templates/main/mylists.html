@@ -1,0 +1,56 @@
+{% extends 'bootstrap/base.html'  %} 
+{% import 'bootstrap/wtf.html' as wtf  %} 
+
+{% block title  %} My Email Lists {% endblock  %}
+
+{%  block   navbar  %}
+{% if current_user.is_authenticated %}
+{% include 'navbar_logged_in.html' %}
+{% else %}
+{% include 'navbar_not_logged_in.html' %}
+{% endif %}
+{%  endblock  %}
+
+{% block content  %} 
+{% include 'flash_messages.html' %}
+
+<div class='container' style= "display: block;text-align: left; margin:0 auto;max-width: 750px; padding-left:200px">
+  <h1>My Email Lists</h1>
+  {% if email_lists %}
+  <div class='table-responsive'>
+    <table class="table">
+
+      
+      <!-- Table Header Row -->
+      <tr>
+        <th>File Name</th>
+        <th>Date Uploaded</th>
+        <th>Date Verified</th>
+        <th>Action</th>
+      </tr>
+      <!-- Table Elements (Rows) -->
+      {% for email_list in email_lists %}
+      <tr>
+        <td>{{ email_list.file_name.split()[1] }}</td>
+        <td>{{ email_list.date_uploaded.strftime("%Y-%m-%d") }}</td>
+        {% if email_list.is_verified %}
+        <td>{{ email_list.date_verified.strftime("%Y-%m-%d") }}</td>
+        <td><a href="{{url_for('main.delete_email_list', email_list_id=email_list.id)}}">Delete</a><br><a href="#">Download Results</a></td>
+        {%  else  %}
+        <td><a href="{{url_for('main.delete_email_list', email_list_id=email_list.id)}}">Delete</a><br><a href="{{url_for('main.validate_email_list', email_list_id=email_list.id)}}">Verify</a></td>
+        {% endif  %}
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+    {% else %}
+    <p>You have not uploaded any email list.</p>
+    <p><a href="{{url_for('main.upload_email_list')}}"> Upload an email list </a> </p>
+    {%  endif %}
+
+  
+</div>
+
+{% include 'footer.html' %}
+
+{% endblock  %}

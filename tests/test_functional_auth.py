@@ -632,6 +632,7 @@ def test_navbar_logged_in(test_client, login_default_user, page):
     assert b'SCRUB MY LIST' in response.data
     assert b'HOME' in response.data
     assert b'UPLOAD EMAIL LIST' in response.data
+    assert b'VIEW EMAIL LISTS' in response.data
     assert b'PROFILE' in response.data
     assert b'LOGOUT' in response.data
 

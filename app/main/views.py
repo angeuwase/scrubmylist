@@ -6,7 +6,9 @@ import csv
 import os
 import pandas as pd
 from werkzeug.utils import secure_filename
-
+from .. import db
+from ..models import EmailList
+from datetime import datetime
 
 
 
@@ -68,8 +70,13 @@ def upload_email_list():
                     df.to_csv(upload_path, index=False)
                     current_app.logger.info(f'New csv file uploaded to the server:{upload_path}')
 
+                    # Create a new email list object and add it to the database
+                    new_email_list = EmailList(upload_path, current_user.id, total_emails, duplicates, datetime.now())
+                    db.session.add(new_email_list)
+                    db.session.commit()
+
                     flash('File has been received!')
-                    return redirect(url_for('main.upload_email_list'))
+                    return redirect(url_for('main.mylists'))
 
                 flash('No column named email in the csv file.')
                 current_app.logger.info(f'No email column in file uploaded:{current_user.email}')
@@ -80,3 +87,48 @@ def upload_email_list():
         return redirect(url_for('main.upload_email_list'))
 
     return render_template('main/upload_list.html')
+
+
+@main_blueprint.route('/mylists')
+@login_required 
+def mylists():
+
+    # Get the list of email lists that belong to the user
+    email_lists = EmailList.query.order_by(EmailList.id).filter_by(owner_id=current_user.id).all()
+
+    return render_template('main/mylists.html', email_lists=email_lists)
+
+@main_blueprint.route('/delete_email_list/<int:email_list_id>')
+@login_required
+def delete_email_list(email_list_id):
+    email_list = EmailList.query.filter_by(id=email_list_id).first()
+    file_name = email_list.file_name    # file_name is the full path to the file
+    db.session.delete(email_list)
+    db.session.commit()
+    os.remove(file_name)
+    flash('The email list has been deleted.')
+    return redirect(url_for('main.mylists'))
+
+@main_blueprint.route('/validate_email_list/<int:email_list_id>')
+@login_required
+def validate_email_list(email_list_id):
+    email_lists = EmailList.query.all()
+    print('all email lists', email_lists)
+    email_list = EmailList.query.filter_by(id=email_list_id).first()
+    print('email list', email_list)
+
+    file_name = email_list.file_name    # file_name is the full path to the file
+    with open(file_name, newline='') as csv_file:
+        csv_reader = csv.DictReader(csv_file)
+        for row in csv_reader:
+            #call the API
+            print(row['email'])
+
+        email_list.is_verified = True
+        email_list.date_verified = datetime.now()
+        db.session.add(email_list)
+        db.session.commit()
+        flash('Email list has successfully been verified')
+        return redirect(url_for('main.mylists'))
+
+    

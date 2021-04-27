@@ -48,4 +48,28 @@ def test_email_list_model(new_list):
     assert new_list.date_uploaded.month == 4
     assert new_list.date_uploaded.day == 14
     assert new_list.owner_id == 17
+    assert new_list.total_emails == 10
+    assert new_list.total_unique_emails == 8
     
+def test_validation_result_model(new_validation_result):
+    """
+    GIVEN a ValidationResult model
+    WHEN a new validation result object is instantiated
+    THEN check that the object has all the expected attributes
+    """
+    assert new_validation_result.email_address == 'test_email@gmail.com'
+    assert new_validation_result.email_list_id == 17
+    assert new_validation_result.is_free == True
+    assert new_validation_result.is_syntax == True
+    assert new_validation_result.is_domain == True
+    assert new_validation_result.is_smtp == True
+    assert new_validation_result.is_verified == True
+    assert new_validation_result.is_server_down == False
+    assert new_validation_result.is_greylisted == False
+    assert new_validation_result.is_disposable == False
+    assert new_validation_result.is_suppressed == False
+    assert new_validation_result.is_role == False
+    assert new_validation_result.is_high_risk == False
+    assert new_validation_result.is_catchall == False
+    assert new_validation_result.status == True
+    assert new_validation_result.mailboxvalidator_score == '0.58'
