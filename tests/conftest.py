@@ -155,8 +155,8 @@ def new_validation_result():
     16. status
     17. mailboxvalidator_score
     """  
-    
-    new_result = ValidationResult('test_email@gmail.com', 17, True, True, True, True, True, False, False, False, False, False, False, False, True, '0.58')
+    #new_result = ValidationResult('test_email@gmail.com', 17, True, True, True, True, True, False, False, False, False, False, False, False, True, '0.58')
+    new_result = ValidationResult('test_email@gmail.com', 17)
 
     return new_result
 
@@ -211,11 +211,11 @@ class MockSuccessResponse(object):
     "is_disposable": "False",
     "is_suppressed": "False",
     "is_role": "False",
-    "is_high_risk": "False",
+    "is_high_risk": "True",
     "is_catchall": "False",
-    "mailboxvalidator_score": "0.58",
+    "mailboxvalidator_score": "0.45",
     "time_taken": "0.8784",
-    "status": "True",
+    "status": "False",
     "credits_available": 999999999,
     "error_code": "",
     "error_message": ""

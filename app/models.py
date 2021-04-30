@@ -2,6 +2,9 @@ from flask_login import UserMixin
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import current_app
+import requests
+
 
 class User(db.Model, UserMixin):
     """
@@ -130,38 +133,82 @@ class ValidationResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email_address = db.Column(db.String)
     email_list_id = db.Column(db.Integer, db.ForeignKey('emaillists.id'))
-    is_free = db.Column(db.Boolean)
-    is_syntax = db.Column(db.Boolean)
-    is_domain = db.Column(db.Boolean)
-    is_smtp = db.Column(db.Boolean)
-    is_verified = db.Column(db.Boolean)
-    is_server_down = db.Column(db.Boolean)
-    is_greylisted = db.Column(db.Boolean)
-    is_disposable = db.Column(db.Boolean)
-    is_suppressed = db.Column(db.Boolean)
-    is_role = db.Column(db.Boolean)
-    is_high_risk = db.Column(db.Boolean)
-    is_catchall = db.Column(db.Boolean)
-    status = db.Column(db.Boolean)
+    is_free = db.Column(db.String)
+    is_syntax = db.Column(db.String)
+    is_domain = db.Column(db.String)
+    is_smtp = db.Column(db.String)
+    is_verified = db.Column(db.String)
+    is_server_down = db.Column(db.String)
+    is_greylisted = db.Column(db.String)
+    is_disposable = db.Column(db.String)
+    is_suppressed = db.Column(db.String)
+    is_role = db.Column(db.String)
+    is_high_risk = db.Column(db.String)
+    is_catchall = db.Column(db.String)
+    status = db.Column(db.String)
     mailboxvalidator_score = db.Column(db.String)
 
-    def __init__(self, email_address,email_list_id,is_free,is_syntax,is_domain,is_smtp,is_verified,is_server_down,is_greylisted,is_disposable,is_suppressed,is_role,is_high_risk,is_catchall,status,mailboxvalidator_score):
+    def __init__(self, email_address, email_list_id):
         self.email_address = email_address
         self.email_list_id = email_list_id
-        self.is_free = is_free
-        self.is_syntax = is_syntax
-        self.is_domain = is_domain
-        self.is_smtp = is_smtp
-        self.is_verified = is_verified
-        self.is_server_down = is_server_down
-        self.is_greylisted = is_greylisted
-        self.is_disposable = is_disposable
-        self.is_suppressed = is_suppressed
-        self.is_role = is_role
-        self.is_high_risk = is_high_risk
-        self.is_catchall = is_catchall
-        self.status = status
-        self.mailboxvalidator_score = mailboxvalidator_score 
+        self.is_free = None
+        self.is_syntax = None
+        self.is_domain = None
+        self.is_smtp = None
+        self.is_verified = None
+        self.is_server_down = None
+        self.is_greylisted = None
+        self.is_disposable = None
+        self.is_suppressed = None
+        self.is_role = None
+        self.is_high_risk = None
+        self.is_catchall = None
+        self.status = None
+        self.mailboxvalidator_score = None
+
+    def create_api_url(self):
+        return "https://api.mailboxvalidator.com/v1/validation/single?email={}&key={}&format=json".format(
+            self.email_address,
+            current_app.config['MAILBOX_VALIDATOR_API_KEY']
+        )
+
+    def convert_to_bool(self, astring):
+        if astring == 'False':
+            return False
+        else:
+            return True
+
+            
+    
+    def get_validation_results(self):
+        url = self.create_api_url()
+        try:
+             response = requests.get(url)
+        except requests.exceptions.ConnectionError:
+            current_app.logger.error(f'Error! Network problem preventing validation of email ({ self.email_address })!')
+
+        error_codes = ['101', '102', '103', '104', '105']
+
+        result = response.json()
+
+        if result['error_code'] in error_codes:
+            current_app.logger.warning(f"Error! Error when validating email: { result['error_code'] }- { result['error_message'] }")
+            return
+        
+        self.is_free = result['is_free']
+        self.is_syntax = result['is_syntax']
+        self.is_domain = result['is_domain']
+        self.is_smtp = result['is_smtp']
+        self.is_verified = result['is_verified']
+        self.is_server_down = result['is_server_down']
+        self.is_greylisted = result['is_greylisted']
+        self.is_disposable = result['is_disposable']
+        self.is_suppressed = result['is_suppressed']
+        self.is_role = result['is_role']
+        self.is_high_risk = result['is_high_risk']
+        self.is_catchall = result['is_catchall']
+        self.status = result['status']
+        self.mailboxvalidator_score = result['mailboxvalidator_score']
     
     def __repr__(self):
         return '<Validation Result {0}: {1}>'.format(self.id, self.email_address)

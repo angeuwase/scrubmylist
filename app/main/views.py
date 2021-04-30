@@ -1,13 +1,13 @@
 from . import main_blueprint
 from ..tasks import reverse_name
-from flask import render_template, request, flash, current_app, url_for, redirect, abort
+from flask import render_template, request, flash, current_app, url_for, redirect, abort, send_file
 from flask_login import login_required, current_user
 import csv
 import os
 import pandas as pd
 from werkzeug.utils import secure_filename
 from .. import db
-from ..models import EmailList
+from ..models import EmailList, ValidationResult
 from datetime import datetime
 
 
@@ -112,23 +112,47 @@ def delete_email_list(email_list_id):
 @main_blueprint.route('/validate_email_list/<int:email_list_id>')
 @login_required
 def validate_email_list(email_list_id):
-    email_lists = EmailList.query.all()
-    print('all email lists', email_lists)
+
     email_list = EmailList.query.filter_by(id=email_list_id).first()
-    print('email list', email_list)
 
     file_name = email_list.file_name    # file_name is the full path to the file
-    with open(file_name, newline='') as csv_file:
+    with open(file_name) as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
-            #call the API
-            print(row['email'])
+            new_validation_result = ValidationResult(row['email'], email_list_id)
+            new_validation_result.get_validation_results()
+            db.session.add(new_validation_result)
 
-        email_list.is_verified = True
-        email_list.date_verified = datetime.now()
-        db.session.add(email_list)
-        db.session.commit()
-        flash('Email list has successfully been verified')
-        return redirect(url_for('main.mylists'))
+    email_list.is_verified = True
+    email_list.date_verified = datetime.now()
+    db.session.add(email_list)
+    db.session.commit()
+    flash('Email list has successfully been verified')
+    return redirect(url_for('main.mylists'))
 
     
+@main_blueprint.route('/download_results/<int:email_list_id>')
+@login_required
+def download_results(email_list_id):
+
+    results = ValidationResult.query.filter_by(email_list_id=email_list_id).all()
+
+    email_list = EmailList.query.filter_by(id=email_list_id).first()
+    
+    new_file_name = 'results_'+current_user.email+' ' +email_list.file_name.split()[1] # file_name is the full path to the file
+
+    upload_path = os.path.abspath(os.path.join(current_app.config['UPLOAD_PATH'], new_file_name))
+
+    results_list = []
+
+    for result in results:
+        data = {'id':result.id, 'email_address':result.email_address, 'email_list_id':result.email_list_id, 'is_free':result.is_free, 'is_syntax': result.is_syntax, 'is_domain':result.is_domain, 'is_smtp':result.is_smtp, 'is_verified':result.is_verified, 'is_server_down':result.is_server_down, 'is_greylisted':result.is_greylisted, 'is_disposable':result.is_disposable, 'is_suppressed':result.is_suppressed, 'is_role':result.is_role, 'is_high_risk':result.is_high_risk, 'is_catchall':result.is_catchall, 'status':result.status, 'mailboxvalidator_score':result.mailboxvalidator_score}
+        results_list.append(data)
+
+    df = pd.DataFrame(results_list)
+  
+    df.to_csv(upload_path, index=False)
+    
+    return send_file(upload_path,
+                     mimetype='text/csv',
+                     as_attachment=True)

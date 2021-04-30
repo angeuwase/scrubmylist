@@ -38,6 +38,8 @@ class Config:
     UPLOAD_PATH = 'assets'
     UPLOAD_EXTENSIONS = ['.csv']
     MAX_CONTENT_LENGTH = 1024 * 4
+
+    MAILBOX_VALIDATOR_API_KEY = "TCLVR8EZUUAAKLXKX0FI"
     
 
 class DevelopmentConfig(Config):

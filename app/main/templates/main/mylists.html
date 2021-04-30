@@ -35,7 +35,7 @@
         <td>{{ email_list.date_uploaded.strftime("%Y-%m-%d") }}</td>
         {% if email_list.is_verified %}
         <td>{{ email_list.date_verified.strftime("%Y-%m-%d") }}</td>
-        <td><a href="{{url_for('main.delete_email_list', email_list_id=email_list.id)}}">Delete</a><br><a href="#">Download Results</a></td>
+        <td><a href="{{url_for('main.delete_email_list', email_list_id=email_list.id)}}">Delete</a><br><a href="{{url_for('main.download_results', email_list_id=email_list.id)}}">Download Results</a></td>
         {%  else  %}
         <td><a href="{{url_for('main.delete_email_list', email_list_id=email_list.id)}}">Delete</a><br><a href="{{url_for('main.validate_email_list', email_list_id=email_list.id)}}">Verify</a></td>
         {% endif  %}

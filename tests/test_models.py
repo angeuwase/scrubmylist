@@ -59,17 +59,17 @@ def test_validation_result_model(new_validation_result):
     """
     assert new_validation_result.email_address == 'test_email@gmail.com'
     assert new_validation_result.email_list_id == 17
-    assert new_validation_result.is_free == True
-    assert new_validation_result.is_syntax == True
-    assert new_validation_result.is_domain == True
-    assert new_validation_result.is_smtp == True
-    assert new_validation_result.is_verified == True
-    assert new_validation_result.is_server_down == False
-    assert new_validation_result.is_greylisted == False
-    assert new_validation_result.is_disposable == False
-    assert new_validation_result.is_suppressed == False
-    assert new_validation_result.is_role == False
-    assert new_validation_result.is_high_risk == False
-    assert new_validation_result.is_catchall == False
-    assert new_validation_result.status == True
-    assert new_validation_result.mailboxvalidator_score == '0.58'
+    assert new_validation_result.is_free == None
+    assert new_validation_result.is_syntax == None
+    assert new_validation_result.is_domain == None
+    assert new_validation_result.is_smtp == None
+    assert new_validation_result.is_verified == None
+    assert new_validation_result.is_server_down == None
+    assert new_validation_result.is_greylisted == None
+    assert new_validation_result.is_disposable == None
+    assert new_validation_result.is_suppressed == None
+    assert new_validation_result.is_role == None
+    assert new_validation_result.is_high_risk == None
+    assert new_validation_result.is_catchall == None
+    assert new_validation_result.status == None
+    assert new_validation_result.mailboxvalidator_score == None

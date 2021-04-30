@@ -232,9 +232,59 @@ def test_delete_email_list_logged_in(test_client, login_default_user,upload_emai
 
 
 @pytest.mark.using_uploaded_file
-def test_successful_validation(test_client, login_default_user, upload_email_list_for_default_user, delete_uploaded_file):
+def test_successful_api_call(new_validation_result, mock_requests_get_success):
     """
     GIVEN a flask application and a monkey-patched version of the requests module
+    WHEN an API call is made and a successful result received
+    THEN check that the validation result gets updated with the validation results
+    """
+
+    new_validation_result.get_validation_results()
+
+    assert new_validation_result.is_free == 'True'
+    assert new_validation_result.is_syntax == 'True'
+    assert new_validation_result.is_domain == 'True'
+    assert new_validation_result.is_smtp == 'True'
+    assert new_validation_result.is_verified == 'True'
+    assert new_validation_result.is_server_down == 'False' 
+    assert new_validation_result.is_greylisted == 'False' 
+    assert new_validation_result.is_disposable == 'False' 
+    assert new_validation_result.is_suppressed == 'False' 
+    assert new_validation_result.is_role == 'False'
+    assert new_validation_result.is_high_risk == 'True'
+    assert new_validation_result.is_catchall == 'False'
+    assert new_validation_result.status == 'False'
+    assert new_validation_result.mailboxvalidator_score == '0.45'
+
+
+@pytest.mark.using_uploaded_file
+def test_unsuccessful_api_call(new_validation_result, mock_requests_get_failure):
+    """
+    GIVEN a flask application and a monkey-patched version of the requests module
+    WHEN an API call is made and a failure result received
+    THEN check that the validation result object does not get updated with the validation results
+    """
+
+    new_validation_result.get_validation_results()
+    assert new_validation_result.is_free == None
+    assert new_validation_result.is_syntax == None
+    assert new_validation_result.is_domain == None
+    assert new_validation_result.is_smtp == None
+    assert new_validation_result.is_verified == None
+    assert new_validation_result.is_server_down == None
+    assert new_validation_result.is_greylisted == None
+    assert new_validation_result.is_disposable == None
+    assert new_validation_result.is_suppressed == None
+    assert new_validation_result.is_role == None
+    assert new_validation_result.is_high_risk == None
+    assert new_validation_result.is_catchall == None
+    assert new_validation_result.status == None
+    assert new_validation_result.mailboxvalidator_score == None
+
+@pytest.mark.using_uploaded_file
+def test_successful_validation(test_client, login_default_user, upload_email_list_for_default_user, delete_uploaded_file):
+    """
+    GIVEN a flask application 
     WHEN a GET request for '/validate_email_list' is received from a logged in user
     THEN check that the email list gets verified correctly
     """
@@ -251,11 +301,6 @@ def test_successful_validation(test_client, login_default_user, upload_email_lis
         assert header in response.data
     for element in data:
         assert element in response.data
-
-
-
-
-
 
 
 
