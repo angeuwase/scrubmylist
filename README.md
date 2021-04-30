@@ -28,7 +28,8 @@ Flask-Login - login and logout functionality
 Flask-SQLAlchemy and Flask-Migrate - database management  
 CSV and Pandas - reading/writing csv files  
 Pytest - testing  
-Requests - HTTP calls to 3rd party API  
+Requests - HTTP calls to 3rd party API    
+Mailboxvalidator - 3rd Party email validation API  
 Docker  
 Postgres  
 
