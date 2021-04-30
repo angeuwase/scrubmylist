@@ -133,7 +133,7 @@ def test_post_successful_file_upload(test_client, login_default_user, delete_upl
     assert b'File has been received!' in response.data
 
 @pytest.mark.file_upload
-def test_post_successful_file_upload_no_email_column(test_client, login_default_use, delete_uploaded_file):
+def test_post_successful_file_upload_no_email_column(test_client, login_default_user):
     """
     GIVEN a flask application
     WHEN a POST request for '/upload_email_list' is received from a user who is logged in but there is no column called "email"
