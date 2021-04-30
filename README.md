@@ -43,7 +43,7 @@ Postgres
 -Had to figure out how to set up Celery in a flask application structured using application factory pattern myself as there weren't any upto date, working tutorials online.    
 -Developing complex features using TDD is very hard, but powerful and worth the effort.    
 -The cornerstone of a good CICD pipeline is unit and integration tests.   
--Building CICD pipeline starts getting difficult and complex as the libraries used in the application increase. In my CI pipeline all the tests passed except tests related to sending email (smtplib.SMTPAuthenticationError: Please log in via your web browser and then try again). Perhaps because the Github Actions test runner is not an actual web server so it cant send out emails??  
+-Building CICD pipeline starts getting difficult and complex as the libraries used in the application increase. In my CI pipeline all the tests passed except tests related to sending email (smtplib.SMTPAuthenticationError: Please log in via your web browser and then try again). 
 
 # Future Projects
 Additional features I would like to add to the application in the future include:  
