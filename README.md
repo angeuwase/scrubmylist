@@ -30,6 +30,7 @@ CSV and Pandas - reading/writing csv files
 Pytest - testing  
 Requests - HTTP calls to 3rd party API    
 Mailboxvalidator - 3rd Party email validation API  
+Gunicorn - WSGI web server  
 Docker  
 Postgres  
 
