@@ -14,8 +14,20 @@
 {% block content  %} 
 {% include 'flash_messages.html' %}
 
+<div class="container" >
+    <div class="col-md-4 col-md-offset-4" >
+        <h1 class='text-center'>Scrub My List</h1>
+        <hr>
+        <p>A flask application developed using test-driven development principles.</p>
+        <p>Email List Verification Service</p>
+        <br>
+        <p><a href="{{url_for('auth.register')}}"> Register</a> for an account or <a href="{{url_for('auth.login')}}"> login in</a> and get started enjoying this app!</p>
 
-<h1>Hello world from main blueprint</h1>
+       
+    </div>
+
+    </div>
+
 {% include 'footer.html' %}
 
 {% endblock  %}
