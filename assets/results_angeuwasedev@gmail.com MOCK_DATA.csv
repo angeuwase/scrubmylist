@@ -1,0 +1,11 @@
+id,email_address,email_list_id,is_free,is_syntax,is_domain,is_smtp,is_verified,is_server_down,is_greylisted,is_disposable,is_suppressed,is_role,is_high_risk,is_catchall,status,mailboxvalidator_score
+11,rrosario0@wufoo.com,2,False,True,True,True,False,False,False,False,False,False,False,False,False,0.18
+12,hduding1@webeden.co.uk,2,False,True,True,True,True,False,False,False,False,False,False,True,True,0.53
+13,mmott2@microsoft.com,2,False,True,True,True,False,False,False,False,False,False,False,False,False,0.18
+14,kcasford3@miibeian.gov.cn,2,False,True,False,-,-,-,-,False,False,False,False,False,False,0
+15,rmulford4@deliciousdays.com,2,False,True,True,True,False,False,False,False,False,False,False,False,False,0.18
+16,pwyard5@fema.gov,2,False,True,True,True,False,False,False,False,False,False,False,True,False,0.13
+17,lkuhnwald6@indiatimes.com,2,False,True,True,True,False,False,False,False,False,False,False,False,False,0.18
+18,aleyson7@mozilla.org,2,False,True,True,True,True,False,False,False,False,False,False,True,True,0.53
+19,mpellett8@istockphoto.com,2,False,True,True,True,False,False,False,False,False,False,False,True,False,0.13
+20,vfransman9@boston.com,2,False,True,True,True,False,False,False,False,False,False,False,False,False,0.18
