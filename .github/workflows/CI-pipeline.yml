@@ -6,13 +6,7 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-env:
-  SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  MAIL_USERNAME: ${{ secrets.MAIL_USERNAME}}
-  MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-  CELERY_BROKER_URL: redis://localhost:6379
-  RESULT_BACKEND: redis://localhost:6379
-
+    
 jobs:
   build:
 
@@ -36,5 +30,11 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        MAIL_USERNAME: ${{ secrets.MAIL_USERNAME}}
+        MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+        CELERY_BROKER_URL: redis://localhost:6379
+        RESULT_BACKEND: redis://localhost:6379
       run: |
         python -m pytest
