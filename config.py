@@ -61,7 +61,7 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     FLASK_ENV = 'production'
     # Postgres database URL has the form postgresql://username:password@hostname/database
-    SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{os.getenv('POSTGRES_USER')}:{os.getenv('POSTGRES_PASSWORD')}@{os.getenv('POSTGRES_HOST')}/{os.getenv('POSTGRES_DB')}"
+    SQLALCHEMY_DATABASE_URI = os.getenv('PROD_DATABASE_URl', default="sqlite:///" + os.path.join(basedir, 'prod.db'))
 
 
 
