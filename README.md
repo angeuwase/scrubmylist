@@ -42,8 +42,8 @@ Postgres
 1. Project Setup including CI pipeline
 2. User management system - registration, login, logout, email confirmation link, password reset, user profile
 3. Email list validation - file upload, calling 3rd party API for email verification, file download
-4. Containerization (in progress)
-5. Deployment to AWS (outstanding)
+4. Containerization 
+5. Deployment to AWS (in progress)
 
 # Challenges and lessons learned
 -Had to figure out how to set up Celery in a flask application structured using application factory pattern myself as there weren't any upto date, working tutorials online.    
