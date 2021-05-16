@@ -42,8 +42,7 @@ Postgres
 1. Project Setup including CI pipeline
 2. User management system - registration, login, logout, email confirmation link, password reset, user profile
 3. Email list validation - file upload, calling 3rd party API for email verification, file download
-4. Containerization 
-5. Deployment to AWS (in progress)
+4. Containerization using Docker
 
 # Challenges and lessons learned
 -Had to figure out how to set up Celery in a flask application structured using application factory pattern myself as there weren't any upto date, working tutorials online.    
@@ -55,6 +54,7 @@ Postgres
 Additional features I would like to add to the application in the future include:  
 1. Ability for users to view email validation results graphically within the application using chart.js or similar.  
 2. Ability for users to download cleaned email list (email list containing only valid email addresses)  
+3. Deploy to AWS
 
 
 
