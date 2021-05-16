@@ -1,5 +1,5 @@
 # scrubmylist
-<<<<<<< HEAD
+
 
 An email validation application
 =======
@@ -56,7 +56,6 @@ Additional features I would like to add to the application in the future include
 1. Ability for users to view email validation results graphically within the application using chart.js or similar.  
 2. Ability for users to download cleaned email list (email list containing only valid email addresses)  
 
-# Video demonstration
 
 
 
